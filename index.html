@@ -158,7 +158,6 @@
             background: rgba(251, 191, 36, 0.1);
         }
 
-        /* Tombol Lainnya diletakkan di bawah penuh */
         .radio-grid label.full-width {
             grid-column: 1 / span 2;
             justify-content: center;
@@ -349,22 +348,12 @@
     <div class="radio-group-container">
         <label>Pilih Target Aplikasi:</label>
         <div class="radio-grid">
-            <!-- Kolom Kiri -->
             <label><input type="radio" name="bmOption" value="infogtk" checked> InfoGTK</label>
-            <!-- Kolom Kanan -->
             <label><input type="radio" name="bmOption" value="totp_code"> SDM Data</label>
-            
-            <!-- Kolom Kiri -->
             <label><input type="radio" name="bmOption" value="kode2fa"> Dapodik</label>
-            <!-- Kolom Kanan -->
             <label><input type="radio" name="bmOption" value="otp"> SIASN / BKN</label>
-            
-            <!-- Kolom Kiri -->
             <label><input type="radio" name="bmOption" value="google_belajar"> Belajar.id</label>
-            <!-- Kolom Kanan -->
             <label><input type="radio" name="bmOption" value="coretax"> Coretax</label>
-            
-            <!-- Baris Bawah -->
             <label class="full-width"><input type="radio" name="bmOption" value="custom_target"> Lainnya</label>
         </div>
     </div>
@@ -535,7 +524,6 @@ function generateBookmarklet() {
             var code=otp.toString().padStart(6,"0");
             
             if(tid==="totp_code"){
-                /* Logika Khusus SDM Data - Auto Fill & Auto Submit */
                 var el = document.getElementById("totp_code") || document.querySelector('input[name="totp_code"]');
                 if(el){ 
                     el.value=code; 
@@ -554,9 +542,15 @@ function generateBookmarklet() {
                 if(el){ el.value=code; el.dispatchEvent(new Event('input', {bubbles:true})); }
                 else alert("OTP Belajar.id: " + code);
             } else if(tid==="coretax"){
-                var el = document.querySelector('input[name="otp"], input[name="token"], .p-inputtext[placeholder*="OTP"]');
-                if(el){ el.value=code; el.dispatchEvent(new Event('input', {bubbles:true})); el.dispatchEvent(new Event('change', {bubbles:true})); }
-                else alert("OTP Pajak: " + code);
+                /* PENYESUAIAN ID INPUT CORETAX: PassCode */
+                var el = document.getElementById("PassCode") || document.querySelector('input[name="PassCode"]');
+                if(el){ 
+                    el.value=code; 
+                    el.dispatchEvent(new Event('input', {bubbles:true})); 
+                    el.dispatchEvent(new Event('change', {bubbles:true})); 
+                } else {
+                    alert("OTP Coretax: " + code);
+                }
             } else if(tid==="custom_target"){
                 var el = document.activeElement && document.activeElement.tagName === "INPUT" ? document.activeElement : document.querySelector('input[type="text"], input[type="tel"]');
                 if(el) { el.value = code; el.dispatchEvent(new Event('input', {bubbles:true})); }
