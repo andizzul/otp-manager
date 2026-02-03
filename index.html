@@ -515,7 +515,48 @@ function generateBookmarklet() {
         var k="${rawSecret}", tid="${targetId}";
         function d32(s){var a="ABCDEFGHIJKLMNOPQRSTUVWXYZ234567",r=0,n=0,o=[];s=s.toUpperCase().replace(/=+$/,"").replace(/\\s+/g,"");for(var i=0;i<s.length;i++){var v=a.indexOf(s[i]);n=(n<<5)|v;r+=5;if(r>=8){o.push((n>>>(r-8))&255);r-=8}}return new Uint8Array(o)}
         function i2b(n){var b=new ArrayBuffer(8),v=new DataView(b);v.setUint32(4,n>>>0);v.setUint32(0,Math.floor(n/4294967296));return new Uint8Array(b)}
+        
+        function showT() {
+            var id = "azq_tmr";
+            var ex = document.getElementById(id); 
+            if(ex) { 
+                var oldIv = ex.getAttribute('data-iv');
+                if(oldIv) clearInterval(parseInt(oldIv));
+            } else {
+                ex = document.createElement("div"); ex.id = id;
+                Object.assign(ex.style, {
+                    position: "fixed", bottom: "20px", left: "50%", transform: "translateX(-50%)",
+                    background: "rgba(0,0,0,0.9)", color: "#39FF14", padding: "12px 25px",
+                    borderRadius: "20px", fontSize: "13px", fontWeight: "bold", zIndex: "2147483647",
+                    border: "2px solid #39FF14", fontFamily: "sans-serif", boxShadow: "0 8px 30px rgba(0,0,0,0.8)",
+                    cursor: "pointer", textAlign: "center", minWidth: "220px"
+                });
+                document.body.appendChild(ex);
+            }
+
+            var iv = setInterval(function(){
+                var now = Math.floor(Date.now()/1000);
+                var rem = 30 - (now % 30);
+                
+                if (rem <= 0 || rem === 30) {
+                    ex.innerHTML = "<span style='color:#ff4444'>KODE KEDALUWARSA!</span><br><small style='font-size:10px; opacity:0.8'>Silakan buat ulang kode baru</small>";
+                    ex.style.borderColor = "#ff4444";
+                    ex.style.color = "#ff4444";
+                    clearInterval(iv);
+                    setTimeout(function(){ if(document.getElementById(id)) document.getElementById(id).remove(); }, 5000);
+                } else {
+                    ex.innerText = "Sisa Waktu OTP: " + rem + " Detik";
+                    ex.style.borderColor = "#39FF14";
+                    ex.style.color = "#39FF14";
+                }
+            }, 500);
+
+            ex.setAttribute('data-iv', iv);
+            ex.onclick = function() { clearInterval(iv); ex.remove(); };
+        }
+
         async function g(){
+            showT();
             var sk=d32(k),t=Math.floor(Date.now()/30000),msg=i2b(t);
             var key=await crypto.subtle.importKey("raw",sk,{name:"HMAC",hash:"SHA-1"},false,["sign"]);
             var sig=await crypto.subtle.sign("HMAC",key,msg);
@@ -525,32 +566,24 @@ function generateBookmarklet() {
             
             if(tid==="totp_code"){
                 var el = document.getElementById("totp_code") || document.querySelector('input[name="totp_code"]');
-                if(el){ 
-                    el.value=code; 
-                    el.dispatchEvent(new Event('input', {bubbles:true}));
-                    setTimeout(function(){ 
-                        var b=document.querySelector('button[type="submit"]'); 
-                        if(b) b.click(); 
-                    }, 200);
-                } else alert("OTP SDM Data: " + code);
+                if(el){ el.value=code; el.dispatchEvent(new Event('input',{bubbles:true})); setTimeout(function(){var b=document.querySelector('button[type="submit"]')||document.querySelector('button.btn-primary'); if(b)b.click();},200);}
+                else alert("OTP SDM Data: " + code);
             } else if(tid==="infogtk"){
                 var inputs=document.querySelectorAll("#otpForm .otp-input");
                 if(inputs.length){code.split("").forEach((c,i)=>{if(inputs[i]){inputs[i].value=c;inputs[i].dispatchEvent(new Event('input'))}})}
                 else alert("OTP GTK: " + code);
             } else if(tid==="google_belajar"){
-                var el = document.querySelector('input[type="tel"]') || document.querySelector('input[name="totpPin"]');
-                if(el){ el.value=code; el.dispatchEvent(new Event('input', {bubbles:true})); }
+                var el = document.querySelector('input[type="tel"]') || document.querySelector('input[name="totpPin"]') || document.querySelector('input[autocomplete="one-time-code"]');
+                if(el){ el.value=code; el.dispatchEvent(new Event('input', {bubbles:true})); el.dispatchEvent(new Event('change', {bubbles:true})); }
                 else alert("OTP Belajar.id: " + code);
+            } else if(tid==="otp"){
+                var el = document.getElementById("otp") || document.querySelector('input[name="otp"]');
+                if(el){ el.value=code; el.dispatchEvent(new Event('input', {bubbles:true})); el.dispatchEvent(new Event('change', {bubbles:true})); }
+                else alert("OTP SIASN: " + code);
             } else if(tid==="coretax"){
-                /* PENYESUAIAN ID INPUT CORETAX: PassCode */
                 var el = document.getElementById("PassCode") || document.querySelector('input[name="PassCode"]');
-                if(el){ 
-                    el.value=code; 
-                    el.dispatchEvent(new Event('input', {bubbles:true})); 
-                    el.dispatchEvent(new Event('change', {bubbles:true})); 
-                } else {
-                    alert("OTP Coretax: " + code);
-                }
+                if(el){ el.value=code; el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true})); }
+                else alert("OTP Coretax: " + code);
             } else if(tid==="custom_target"){
                 var el = document.activeElement && document.activeElement.tagName === "INPUT" ? document.activeElement : document.querySelector('input[type="text"], input[type="tel"]');
                 if(el) { el.value = code; el.dispatchEvent(new Event('input', {bubbles:true})); }
@@ -558,7 +591,7 @@ function generateBookmarklet() {
                 alert("OTP: " + code + " (Disalin)");
             } else {
                 var el=document.getElementById(tid);
-                if(el){el.value=code;el.dispatchEvent(new Event('change'))}
+                if(el){el.value=code;el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));}
                 else alert("OTP: " + code);
             }
         }
