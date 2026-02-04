@@ -345,7 +345,6 @@
 <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
 
 <script>
-// Fungsi-fungsi inti tetap dipertahankan sesuai permintaan agar tidak merusak sistem yang sudah sangat penting
 function showAlert(msg) {
     const box = document.getElementById('alert-box');
     document.getElementById('alert-text').textContent = msg;
@@ -505,11 +504,11 @@ function generateBookmarklet() {
                 var now = Math.floor(Date.now()/1000);
                 var rem = 30 - (now % 30);
                 if (rem <= 0 || rem === 30) {
-                    ex.innerHTML = "<span style='color:#ff4444'>KODE KEDALUWARSA!</span><br><small style='font-size:10px; opacity:0.8'>Silakan buat ulang kode baru</small>";
+                    ex.innerHTML = "<span style='color:#ff4444'>KODE KEDALUWARSA!</span><br><small style='font-size:10px; opacity:0.8'>Buat ulang kode baru</small>";
                     ex.style.borderColor = "#ff4444";
                     ex.style.color = "#ff4444";
                     clearInterval(iv);
-                    setTimeout(function(){ if(document.getElementById(id)) document.getElementById(id).remove(); }, 5000);
+                    setTimeout(function(){ if(document.getElementById(id)) document.getElementById(id).remove(); }, 10000);
                 } else {
                     ex.innerText = "Sisa Waktu OTP: " + rem + " Detik";
                     ex.style.borderColor = "#39FF14";
@@ -534,8 +533,7 @@ function generateBookmarklet() {
 
             if(tid==="totp_code"){
                 var el = document.getElementById("totp_code") || document.querySelector('input[name="totp_code"]');
-                if(setV(el,code)){ setTimeout(function(){var b=document.querySelector('button[type="submit"]')||document.querySelector('button.btn-primary'); if(b)b.click();},200);}
-                else alert("OTP SDM Data: " + code);
+                setV(el,code);
             } else if(tid==="infogtk"){
                 var ins=document.querySelectorAll("#otpForm .otp-input");
                 if(ins.length){code.split("").forEach((c,i)=>{if(ins[i])setV(ins[i],c)})}
